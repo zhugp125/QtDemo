@@ -25,13 +25,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        widget.cpp
+        widget.cpp \
+    ButtonItemDelegate.cpp
 
 HEADERS += \
-        widget.h
+        widget.h \
+    ButtonItemDelegate.h
 
 FORMS += \
         widget.ui
 
 DISTFILES += \
     ReadMe.txt
+
+RESOURCES += \
+    images.qrc

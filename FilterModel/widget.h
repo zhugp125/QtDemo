@@ -29,6 +29,8 @@ public slots:
     void onOpenDir();
     void onFile();
     void onDir();
+    void onCloseClicked(const QModelIndex& index);
+    void onViewClicked(const QModelIndex& index);
 
 private:
     Ui::Widget *ui;
