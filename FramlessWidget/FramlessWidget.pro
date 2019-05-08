@@ -24,8 +24,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+        TitleWidget.cpp \
         main.cpp \
         widget.cpp
 
 HEADERS += \
+        TitleWidget.h \
         widget.h

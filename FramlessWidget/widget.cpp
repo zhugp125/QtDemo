@@ -1,24 +1,50 @@
 #include "widget.h"
-#include <QPushButton>
+#include "TitleWidget.h"
 #include <QMouseEvent>
-#include <QDebug>
+#include <QDesktopWidget>
+#include <QApplication>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
-    p_close_button_ = new QPushButton("close", this);
-    p_close_button_->move(20, 20);
-    connect(p_close_button_, &QAbstractButton::clicked, this, &QWidget::close);
+    p_title_widget_ = new CTitleWidget(this);
+    p_title_widget_->setTitle("Frameless Widget");
+    connect(p_title_widget_, &CTitleWidget::signalClose, this, &QWidget::close);
+    connect(p_title_widget_, &CTitleWidget::signalMin, this, &QWidget::showMinimized);
+    connect(p_title_widget_, &CTitleWidget::signalMax, this, &Widget::onShowMaximized);
 
     resize(400, 300);
     setMinimumSize(320, 240);
-    setMaximumSize(600, 500);
+    //setMaximumSize(600, 500);
     setMouseTracking(true);
     setWindowFlags(Qt::FramelessWindowHint | Qt::Widget);
 }
 
 Widget::~Widget()
 {
+}
+
+void Widget::onShowMaximized()
+{
+    if (size() == QApplication::desktop()->size()) // 已经最大化，还原
+    {
+        setGeometry(property("geometry").toRect());
+    }
+    else
+    {
+        setProperty("geometry", geometry());
+        setGeometry(QApplication::desktop()->geometry());
+    }
+}
+
+void Widget::resizeEvent(QResizeEvent *event)
+{
+    if (p_title_widget_ != nullptr)
+    {
+        p_title_widget_->setFixedWidth(width());
+        p_title_widget_->move(0, 0);
+    }
+    QWidget::resizeEvent(event);
 }
 
 void Widget::mousePressEvent(QMouseEvent *event)

@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-class QPushButton;
+class CTitleWidget;
 
 // 鼠标拖动方向
 enum MoveDirection
@@ -24,10 +24,14 @@ class Widget : public QWidget
     Q_OBJECT
 
 public:
-    Widget(QWidget *parent = 0);
+    Widget(QWidget *parent = nullptr);
     ~Widget();
 
+public slots:
+    void onShowMaximized();
+
 protected:
+    void resizeEvent(QResizeEvent* event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
 
@@ -44,10 +48,11 @@ private:
     void testEdge(const QPoint &p);
 
 private:
-    QPushButton* p_close_button_ = nullptr; // 关闭按钮
     QPoint start_pos_;                      // 鼠标落下点的坐标
     const int num_edge_ = 4;                // 边缘距离
     MoveDirection enum_direction_ = NoDir;  // 拖动方向
+
+    CTitleWidget* p_title_widget_ = nullptr;
 };
 
 #endif // WIDGET_H
