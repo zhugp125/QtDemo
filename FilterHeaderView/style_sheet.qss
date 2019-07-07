@@ -1,0 +1,5 @@
+CFilterHeaderView {
+    qproperty-m_norFilterPix: url(:/filter.svg);
+    qproperty-m_hovFilterPix: url(:/filter_black.svg);
+    qproperty-m_preFilterPix: url(:/filter_red.svg);
+}
