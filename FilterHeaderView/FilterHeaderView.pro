@@ -27,12 +27,14 @@ CONFIG += c++11
 SOURCES += \
         FilterHeaderView.cpp \
         ShowFilterWidget.cpp \
+        SortFilterProxyModel.cpp \
         main.cpp \
         widget.cpp
 
 HEADERS += \
         FilterHeaderView.h \
         ShowFilterWidget.h \
+        SortFilterProxyModel.h \
         widget.h
 
 # Default rules for deployment.

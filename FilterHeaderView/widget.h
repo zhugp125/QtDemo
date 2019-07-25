@@ -9,11 +9,11 @@ QT_BEGIN_NAMESPACE
 class QTableView;
 class QStandardItemModel;
 class QStandardItem;
-class QSortFilterProxyModel;
 
 QT_END_NAMESPACE
 
 class CShowFilterWidget;
+class CSortFilterProxyModel;
 
 class Widget : public QWidget
 {
@@ -35,7 +35,7 @@ private Q_SLOTS:
 private:
     QTableView* m_tableView = nullptr;
     QStandardItemModel* m_model = nullptr;
-    QSortFilterProxyModel* m_filterModel = nullptr;
+    CSortFilterProxyModel* m_filterModel = nullptr;
 
     QSharedPointer<CShowFilterWidget> m_filterWidget;
 };

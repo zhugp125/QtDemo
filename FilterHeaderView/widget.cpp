@@ -6,15 +6,16 @@
 
 #include "FilterHeaderView.h"
 #include "ShowFilterWidget.h"
+#include "SortFilterProxyModel.h"
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
     m_tableView = new QTableView(this);
     m_model = new QStandardItemModel(this);
-    m_filterModel = new QSortFilterProxyModel(this);
+    m_filterModel = new CSortFilterProxyModel(this);
+    m_filterModel->setFilterRole(Qt::ToolTipRole);
     m_filterModel->setSourceModel(m_model);
-    m_filterModel->setSortRole(Qt::ToolTipRole);
     m_tableView->setModel(m_filterModel);
 
     QHBoxLayout* mainLayout = new QHBoxLayout(this);
@@ -110,6 +111,7 @@ void Widget::onHeaderDataChanged(Qt::Orientation orientation, int first, int las
         if (var.isValid() && var.toBool())
         {
             m_filterWidget->addFilter(section);
+            m_filterModel->addFilter(section);
         }
     }
 }
@@ -142,10 +144,6 @@ void Widget::onRowRemoved(const QModelIndex &, int first, int last)
 
 void Widget::onFilterHide(int section)
 {
-    m_filterModel->setFilterKeyColumn(section);
-
-    QList<QString> strDatas = m_filterWidget->getSelectData();
-    QString pattern = "[" + strDatas.join("|") + "]";
-    m_filterModel->setFilterRegExp(pattern);
+    m_filterModel->setFilterData(section, m_filterWidget->getSelectData());
 }
 
