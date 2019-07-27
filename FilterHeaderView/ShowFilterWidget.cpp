@@ -2,6 +2,15 @@
 #include <QListView>
 #include <QStandardItemModel>
 #include <QHBoxLayout>
+#include <QPainter>
+#include <QBitmap>
+
+const int g_triangle_bottom = 10;
+const int g_triangle_height = 6;
+const int g_arc_r = 2;
+const QColor g_background_color = QColor(255, 255, 255);
+const QColor g_border_color = QColor(226, 226, 226);
+
 
 CShowFilterWidget::CShowFilterWidget(QWidget *parent) : QWidget(parent)
 {
@@ -10,7 +19,7 @@ CShowFilterWidget::CShowFilterWidget(QWidget *parent) : QWidget(parent)
     m_listView->setModel(m_model);
 
     QHBoxLayout* mainLayout = new QHBoxLayout(this);
-    mainLayout->setMargin(0);
+    mainLayout->setMargin(16);
     mainLayout->addWidget(m_listView);
     setLayout(mainLayout);
 
@@ -20,8 +29,8 @@ CShowFilterWidget::CShowFilterWidget(QWidget *parent) : QWidget(parent)
 
     setWindowFlags(Qt::ToolTip | Qt::FramelessWindowHint);
 
-    setFixedWidth(80);
-    setMaximumHeight(100);
+    setFixedWidth(120);
+    setMaximumHeight(140);
 
     connect(m_listView, &QAbstractItemView::clicked, this, &CShowFilterWidget::onItemCliked);
 }
@@ -144,4 +153,50 @@ void CShowFilterWidget::hideEvent(QHideEvent *event)
 {
     emit filterHide(m_currentSection);
     QWidget::hideEvent(event);
+}
+
+void CShowFilterWidget::paintEvent(QPaintEvent *event)
+{
+    // QPainterPath closeSubpath方法会闭合曲线，注释代码可加可不加
+    QPainterPath path;
+    path.moveTo(g_arc_r, g_triangle_height);
+    path.arcTo(0, g_triangle_height, g_arc_r * 2, g_arc_r * 2, 90.0, 90.0);
+    //path.lineTo(0, height() - g_triangle_height);
+    path.arcTo(0, height() - g_arc_r * 2, g_arc_r * 2, g_arc_r * 2, 180.0, 90.0);
+    //path.lineTo(g_arc_r, height());
+    path.arcTo(width() - g_arc_r * 2, height() - g_arc_r * 2, g_arc_r * 2, g_arc_r * 2, 270.0, 90.0);
+    //path.lineTo(width(), height() - g_arc_r * 2 - g_triangle_height);
+    path.arcTo(width() - g_arc_r * 2, g_triangle_height, g_arc_r * 2, g_arc_r * 2, 0.0, 90.0);
+    path.lineTo((width() + g_triangle_bottom) / 2, g_triangle_height);
+    path.lineTo(width() / 2, 0);
+    path.lineTo((width() - g_triangle_bottom) / 2, g_triangle_height);
+    //path.lineTo(g_arc_r, g_triangle_height);
+    path.closeSubpath();
+
+    QBitmap bitmap(size());
+    bitmap.fill();
+    QPainter p(&bitmap);
+    QPen pen;
+    pen.setColor(QColor(204, 204, 204));
+    pen.setWidth(1);
+    p.setPen(pen);
+    p.setRenderHint(QPainter::Antialiasing);
+
+    p.drawPath(path);
+    p.fillPath(path, QBrush(Qt::black));
+    setMask(bitmap);
+
+    // 背景颜色
+    QPainter painter(this);
+    QBrush brush(g_background_color);
+    painter.setBrush(brush);
+    painter.fillRect(rect(), brush);
+
+    // 边框颜色
+    pen.setColor(g_border_color);
+    painter.setPen(pen);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.drawPath(path);
+
+    QWidget::paintEvent(event);
 }

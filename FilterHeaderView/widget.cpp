@@ -94,7 +94,7 @@ void Widget::appendRow(const QStringList &items)
 
 void Widget::onFilterClicked(int section)
 {
-    m_filterWidget->move(cursor().pos());
+    m_filterWidget->move(cursor().pos() - QPoint(m_filterWidget->width() / 2, 3));
     m_filterWidget->showFilter(section);
 }
 

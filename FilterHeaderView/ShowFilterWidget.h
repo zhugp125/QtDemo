@@ -66,6 +66,7 @@ public:
 
 protected:
     virtual void hideEvent(QHideEvent *event);
+    virtual void paintEvent(QPaintEvent* event);
 
 private:
     QMap<int, QMap<QString, bool> > m_filterData;
