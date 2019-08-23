@@ -31,6 +31,7 @@ Widget::Widget(QWidget *parent)
     CFilterHeaderView* pHeader = new CFilterHeaderView(this);
     connect(pHeader, &CFilterHeaderView::filterClicked, this, &Widget::onFilterClicked);
     m_tableView->setHorizontalHeader(pHeader);
+    connect(m_tableView, &QAbstractItemView::clicked, pHeader, &CFilterHeaderView::onUpdateCheckState);
 
     m_filterWidget = QSharedPointer<CShowFilterWidget>(new CShowFilterWidget);
     m_filterWidget->hide();
@@ -40,9 +41,13 @@ Widget::Widget(QWidget *parent)
     connect(m_model, &QAbstractItemModel::rowsInserted, this, &Widget::onRowInserted);
     connect(m_model, &QAbstractItemModel::rowsRemoved, this, &Widget::onRowRemoved);
 
-    m_model->setColumnCount(4);
+    m_model->setColumnCount(5);
     Qt::Orientation orientation = Qt::Horizontal;
     int section = 0;
+
+    m_model->setHeaderData(section, orientation, Qt::Unchecked, Qt::CheckStateRole);
+
+    ++section;
     m_model->setHeaderData(section, orientation, "ID", Qt::DisplayRole);
     m_model->setHeaderData(section, orientation, "ID", Qt::ToolTipRole);
     m_model->setHeaderData(section, orientation, Qt::AlignCenter, Qt::TextAlignmentRole);
@@ -71,7 +76,7 @@ Widget::Widget(QWidget *parent)
     appendRow(QStringList() << "3" << "王五" << "90" << "优");
     appendRow(QStringList() << "4" << "赵六" << "50" << "差");
 
-    resize(420, 300);
+    resize(600, 300);
 }
 
 Widget::~Widget()
@@ -82,6 +87,12 @@ Widget::~Widget()
 void Widget::appendRow(const QStringList &items)
 {
     QList<QStandardItem* > ptr_items;
+    {
+        QStandardItem* pItem = new QStandardItem;
+        pItem->setCheckable(true);
+        pItem->setCheckState(Qt::Unchecked);
+        ptr_items.append(pItem);
+    }
     for (const auto& text : items)
     {
         QStandardItem* pItem = new QStandardItem;

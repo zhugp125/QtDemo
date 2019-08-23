@@ -29,6 +29,9 @@ public:
 Q_SIGNALS:
     void filterClicked(int section);
 
+public Q_SLOTS:
+    void onUpdateCheckState(const QModelIndex &index);
+
 protected:
     virtual void paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const;
 
@@ -47,6 +50,8 @@ private:
 
     int m_hover = -1;
     int m_press = -1;
+
+    int m_checkedNum = 0; // 复选框列选中行数
 };
 
 #endif // FILTERHEADERVIEW_H

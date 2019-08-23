@@ -1,10 +1,40 @@
 #include "FilterHeaderView.h"
 #include <QPainter>
 #include <QMouseEvent>
+#include <QStyleOption>
+#include <QStyle>
 
 CFilterHeaderView::CFilterHeaderView(QWidget *parent)
     : QHeaderView(Qt::Horizontal, parent)
 {
+    setSectionsClickable(true);
+}
+
+void CFilterHeaderView::onUpdateCheckState(const QModelIndex &index)
+{
+    if (!index.isValid())
+    {
+        return;
+    }
+
+    QVariant checkStateVar = model()->data(index, Qt::CheckStateRole);
+    if (checkStateVar.isValid())
+    {
+        (checkStateVar.toInt() == Qt::Checked) ? (++m_checkedNum) : (--m_checkedNum);
+
+        if (m_checkedNum <= 0)
+        {
+            model()->setHeaderData(index.column(), orientation(), Qt::Unchecked, Qt::CheckStateRole);
+        }
+        else if (m_checkedNum >= model()->rowCount())
+        {
+            model()->setHeaderData(index.column(), orientation(), Qt::Checked, Qt::CheckStateRole);
+        }
+        else
+        {
+            model()->setHeaderData(index.column(), orientation(), Qt::PartiallyChecked, Qt::CheckStateRole);
+        }
+    }
 }
 
 void CFilterHeaderView::paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const
@@ -12,6 +42,19 @@ void CFilterHeaderView::paintSection(QPainter *painter, const QRect &rect, int l
     painter->save();
     QHeaderView::paintSection(painter, rect, logicalIndex);
     painter->restore();
+
+    QVariant checkStateVar = model()->headerData(logicalIndex, orientation(), Qt::CheckStateRole);
+    if (checkStateVar.isValid())
+    {
+        QStyleOptionViewItem option;
+        option.initFrom(this);
+
+        option.checkState = static_cast<Qt::CheckState>(checkStateVar.toInt());
+        option.features = QStyleOptionViewItem::HasCheckIndicator;
+        option.viewItemPosition = QStyleOptionViewItem::OnlyOne;
+
+        style()->drawControl(QStyle::CE_ItemViewItem, &option, painter, this);
+    }
 
     QVariant filterVar = model()->headerData(logicalIndex, orientation(), FilterRole);
     if (filterVar.isValid() && filterVar.toBool())
@@ -42,6 +85,24 @@ void CFilterHeaderView::mousePressEvent(QMouseEvent *e)
     m_press = logicalIndexAt(e->pos());
     if (m_press != -1)
         updateSection(m_press);
+
+    QVariant checkStateVar = model()->headerData(m_press, orientation(), Qt::CheckStateRole);
+    if (checkStateVar.isValid())
+    {
+        Qt::CheckState checkState = static_cast<Qt::CheckState>(checkStateVar.toInt());
+        checkState = (checkState == Qt::Checked) ? Qt::Unchecked : Qt::Checked;
+        model()->setHeaderData(m_press, orientation(), checkState, Qt::CheckStateRole);
+
+        // 更新选中行数
+        m_checkedNum = (checkState == Qt::Checked) ? model()->rowCount() : 0;
+
+        for (int r = 0; r < model()->rowCount(); ++r)
+        {
+            QModelIndex index = model()->index(r, m_press);
+            model()->setData(index, checkState, Qt::CheckStateRole);
+        }
+    }
+
     QHeaderView::mousePressEvent(e);
 }
 

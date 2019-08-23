@@ -27,7 +27,7 @@ CShowFilterWidget::CShowFilterWidget(QWidget *parent) : QWidget(parent)
     m_listView->setSelectionMode(QAbstractItemView::SingleSelection);
     m_listView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    setWindowFlags(Qt::ToolTip | Qt::FramelessWindowHint);
+    setWindowFlags(Qt::Popup | Qt::FramelessWindowHint);
 
     setFixedWidth(120);
     setMaximumHeight(140);
