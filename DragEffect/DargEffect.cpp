@@ -79,8 +79,8 @@ void DargEffect::paintEvent(QPaintEvent *event)
     }
 
     QLinearGradient liner_gradient;
-    liner_gradient.setColorAt(0.0, Qt::red);
-    liner_gradient.setColorAt(1.0, Qt::gray);
+    liner_gradient.setColorAt(0.0, QColor("#E0EAFC"));
+    liner_gradient.setColorAt(1.0, QColor("#CFDEF3"));
     p.save();
     p.setBrush(liner_gradient);
     p.setPen(Qt::white);
