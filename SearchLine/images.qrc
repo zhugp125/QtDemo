@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/search_dis.svg</file>
+        <file>images/search_hov.svg</file>
+        <file>images/search_nor.svg</file>
+        <file>images/search_pre.svg</file>
+        <file>images/clear_dis.svg</file>
+        <file>images/clear_nor.svg</file>
+        <file>images/clear_pre.svg</file>
+        <file>images/clear_hov.svg</file>
+        <file>search_line.qss</file>
+    </qresource>
+</RCC>

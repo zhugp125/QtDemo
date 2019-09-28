@@ -1,0 +1,10 @@
+SearchLine {
+    qproperty-normal_clear_button_icon: url(:/images/clear_nor.svg);
+    qproperty-hover_clear_button_icon: url(:/images/clear_hov.svg);
+    qproperty-press_clear_button_icon: url(:/images/clear_pre.svg);
+    qproperty-disable_clear_button_icon: url(:/images/clear_dis.svg);
+    qproperty-normal_search_button_icon: url(:/images/search_nor.svg);
+    qproperty-hover_search_button_icon: url(:/images/search_hov.svg);
+    qproperty-press_search_button_icon: url(:/images/search_pre.svg);
+    qproperty-disable_search_button_icon: url(:/images/search_dis.svg);
+}
