@@ -62,6 +62,16 @@ public:
     void SetSearchButtonEnabled(bool enabled);
     bool GetSearchButtonEnabled() const;
 
+    /// 设置搜索图标是否可见
+    void SetSearchButtonVisible(bool visible);
+    bool GetSearchButtonVisible() const;
+
+    /// 清除图标是否可见
+    bool GetClearButtonVisible() const;
+
+    void SetButtonSize(const QSize& size);
+    void SetButtonSpacing(int spacing);
+
 signals:
     /// 模仿点击清除图标发出对信号
     void SignalClearButtonClicked();
@@ -82,7 +92,6 @@ private:
         NoButton = -1,
         ClearButton,
         SearchButton,
-        ButtonCount    // last enum define
     };
 
     /// 图标状态
@@ -112,6 +121,8 @@ private:
     /// 实际绘制图标的方法
     void DrawButtonItem(QPainter* painter, ButtonPosition btn_postion);
 
+    bool CheckMousePos(ButtonPosition btn_postion) const;
+
 private:
     Qt::LayoutDirection direction_ = Qt::LeftToRight;
 
@@ -121,6 +132,11 @@ private:
 
     ButtonPosition btn_hover_ = ButtonPosition::NoButton;
     ButtonPosition btn_press_ = ButtonPosition::NoButton;
+
+    bool search_btn_visible_ = false;
+
+    QSize btn_size_ = QSize(24, 24);
+    int btn_spacing_ = 3;
 };
 
 #endif // SEARCHLINE_H

@@ -10,6 +10,7 @@ Widget::Widget(QWidget *parent)
 
     ptr_search_line_->SetLayoutDirection(Qt::RightToLeft);
     ptr_search_line_->setAlignment(Qt::AlignRight | Qt::AlignAbsolute);
+    ptr_search_line_->SetSearchButtonVisible(true);
 }
 
 Widget::~Widget()

@@ -4,10 +4,6 @@
 #include <QEvent>
 #include <QDebug>
 
-constexpr int g_btn_width = 24;
-constexpr int g_btn_height = 24;
-constexpr int g_btn_spacing = 3;
-
 SearchLine::SearchLine(QWidget *parent) : QLineEdit(parent)
 {
     setMouseTracking(true);
@@ -103,15 +99,10 @@ QIcon SearchLine::GetDisableSearchButtonIcon() const
 
 void SearchLine::SetLayoutDirection(const Qt::LayoutDirection direction)
 {
-    direction_ = direction;
-    int btn_count = static_cast<int>(ButtonPosition::ButtonCount);
-    if (Qt::LeftToRight == direction_)
+    if (direction_ != direction)
     {
-        setTextMargins(5, 3, btn_count * g_btn_width + (btn_count + 1) * g_btn_spacing, 3);
-    }
-    else
-    {
-        setTextMargins(btn_count * g_btn_width + (btn_count + 1) * g_btn_spacing, 3, 5, 3);
+        direction_ = direction;
+        update();
     }
 }
 
@@ -140,41 +131,95 @@ bool SearchLine::GetSearchButtonEnabled() const
     return GetButtonEnabled(ButtonPosition::SearchButton);
 }
 
+void SearchLine::SetSearchButtonVisible(bool visible)
+{
+    if (search_btn_visible_ != visible)
+    {
+        search_btn_visible_ = visible;
+        update();
+    }
+}
+
+bool SearchLine::GetSearchButtonVisible() const
+{
+    return search_btn_visible_;
+}
+
+bool SearchLine::GetClearButtonVisible() const
+{
+    return !text().isEmpty();
+}
+
+void SearchLine::SetButtonSize(const QSize &size)
+{
+    if (!size.isNull() && size != btn_size_)
+    {
+        btn_size_ = size;
+        update();
+    }
+}
+
+void SearchLine::SetButtonSpacing(int spacing)
+{
+    if (spacing > 0 && spacing != btn_spacing_)
+    {
+        btn_spacing_ = spacing;
+        update();
+    }
+}
+
 void SearchLine::paintEvent(QPaintEvent *event)
 {
+    int btn_count = 0;
+    if (GetClearButtonVisible())
+    {
+        ++btn_count;
+    }
+    if (GetSearchButtonVisible())
+    {
+        ++btn_count;
+    }
+
+    if (Qt::LeftToRight == direction_)
+    {
+        setTextMargins(5, 3, btn_count * btn_size_.width() + (btn_count + 1) * btn_spacing_, 3);
+    }
+    else
+    {
+        setTextMargins(btn_count * btn_size_.width() + (btn_count + 1) * btn_spacing_, 3, 5, 3);
+    }
+
     QLineEdit::paintEvent(event);
 
     QPainter p(this);
-    if (!text().isEmpty())
+    if (GetClearButtonVisible())
     {
         DrawButtonItem(&p, ButtonPosition::ClearButton);
     }
-    DrawButtonItem(&p, ButtonPosition::SearchButton);
+    if (GetSearchButtonVisible())
+    {
+        DrawButtonItem(&p, ButtonPosition::SearchButton);
+    }
 }
 
 void SearchLine::mouseMoveEvent(QMouseEvent *event)
 {
     QLineEdit::mouseMoveEvent(event);
 
-    if (!text().isEmpty() && GetClearButtonEnabled())
+    ButtonPosition btn_postion = ButtonPosition::ClearButton;
+    if (GetClearButtonVisible() && GetClearButtonEnabled() && CheckMousePos(btn_postion))
     {
-        QPoint clear_pos = mapToGlobal(GetButtonPos(ButtonPosition::ClearButton));
-        if (QRect(clear_pos, QSize(g_btn_width, g_btn_height)).contains(QCursor::pos()))
-        {
-            btn_hover_ = ButtonPosition::ClearButton;
-            update();
-            return;
-        }
+        btn_hover_ = btn_postion;
+        update();
+        return;
     }
-    if (GetSearchButtonEnabled())
+
+    btn_postion = ButtonPosition::SearchButton;
+    if (GetSearchButtonVisible() && GetSearchButtonEnabled() && CheckMousePos(btn_postion))
     {
-        QPoint search_pos = mapToGlobal(GetButtonPos(ButtonPosition::SearchButton));
-        if (QRect(search_pos, QSize(g_btn_width, g_btn_height)).contains(QCursor::pos()))
-        {
-            btn_hover_ = ButtonPosition::SearchButton;
-            update();
-            return;
-        }
+        btn_hover_ = btn_postion;
+        update();
+        return;
     }
 
     btn_hover_ = ButtonPosition::NoButton;
@@ -185,35 +230,38 @@ void SearchLine::mousePressEvent(QMouseEvent *event)
 {
     QLineEdit::mousePressEvent(event);
 
-    if (!text().isEmpty() && GetClearButtonEnabled())
+    ButtonPosition btn_postion = ButtonPosition::ClearButton;
+    if (GetClearButtonVisible() && GetClearButtonEnabled() && CheckMousePos(btn_postion))
     {
-        QPoint clear_pos = mapToGlobal(GetButtonPos(ButtonPosition::ClearButton));
-        if (QRect(clear_pos, QSize(g_btn_width, g_btn_height)).contains(QCursor::pos()))
-        {
-            btn_press_ = ButtonPosition::ClearButton;
-            update();
-
-            emit SignalClearButtonClicked();
-            qDebug() << "emit SignalClearButtonClicked()";
-        }
+        btn_press_ = ButtonPosition::ClearButton;
+        update();
     }
-    if (GetSearchButtonEnabled())
-    {
-        QPoint search_pos = mapToGlobal(GetButtonPos(ButtonPosition::SearchButton));
-        if (QRect(search_pos, QSize(g_btn_width, g_btn_height)).contains(QCursor::pos()))
-        {
-            btn_press_ = ButtonPosition::SearchButton;
-            update();
 
-            emit SignalSearchButtonClicked();
-            qDebug() << "emit SignalSearchButtonClicked()";
-        }
+    btn_postion = ButtonPosition::SearchButton;
+    if (GetSearchButtonVisible() && GetSearchButtonEnabled() && CheckMousePos(btn_postion))
+    {
+        btn_press_ = ButtonPosition::SearchButton;
+        update();
     }
 }
 
 void SearchLine::mouseReleaseEvent(QMouseEvent *event)
 {
     QLineEdit::mouseReleaseEvent(event);
+
+    ButtonPosition btn_postion = ButtonPosition::ClearButton;
+    if (GetClearButtonVisible() && GetClearButtonEnabled() && CheckMousePos(btn_postion))
+    {
+        emit SignalClearButtonClicked();
+        qDebug() << "emit SignalClearButtonClicked()";
+    }
+
+    btn_postion = ButtonPosition::SearchButton;
+    if (GetSearchButtonVisible() && GetSearchButtonEnabled() && CheckMousePos(btn_postion))
+    {
+        emit SignalSearchButtonClicked();
+        qDebug() << "emit SignalSearchButtonClicked()";
+    }
 
     if (btn_press_ != ButtonPosition::NoButton)
     {
@@ -248,15 +296,36 @@ QPoint SearchLine::GetButtonPos(SearchLine::ButtonPosition btn_postion) const
     }
 
     int start_x = 0;
-    int start_y = (height() - g_btn_height) / 2;
-    int relative_pos = static_cast<int>(ButtonPosition::ButtonCount - btn_postion);
+    int start_y = (height() - btn_size_.height()) / 2;
+
+    int relative_pos = 0;
+    do
+    {
+        if (GetSearchButtonVisible())
+        {
+            ++relative_pos;
+            if (ButtonPosition::SearchButton == btn_postion)
+            {
+                break;
+            }
+        }
+        if (GetClearButtonVisible())
+        {
+            ++relative_pos;
+            if (ButtonPosition::ClearButton == btn_postion)
+            {
+                break;
+            }
+        }
+    }while(false);
+
     if (Qt::LeftToRight == direction_)
     {
-        start_x = width() - (g_btn_width + g_btn_spacing) * relative_pos;
+        start_x = width() - (btn_size_.width() + btn_spacing_) * relative_pos;
     }
     else
     {
-        start_x = g_btn_spacing * relative_pos + g_btn_width * (relative_pos - 1);
+        start_x = btn_spacing_ * relative_pos + btn_size_.width() * (relative_pos - 1);
     }
     return QPoint(start_x, start_y);
 }
@@ -267,7 +336,7 @@ QRect SearchLine::GetButtonRect(SearchLine::ButtonPosition btn_postion) const
     {
         return QRect();
     }
-    return QRect(GetButtonPos(btn_postion), QSize(g_btn_width, g_btn_height));
+    return QRect(GetButtonPos(btn_postion), btn_size_);
 }
 
 void SearchLine::SetButtonEnabled(SearchLine::ButtonPosition btn_postion, bool enabled)
@@ -294,7 +363,7 @@ void SearchLine::SetButtonPixmap(SearchLine::ButtonPosition btn_postion, SearchL
         pixmap_vec.resize(status_count);
     }
 
-    pixmap_vec[static_cast<int>(btn_status)] = icon.pixmap(g_btn_width, g_btn_height);
+    pixmap_vec[static_cast<int>(btn_status)] = icon.pixmap(btn_size_);
 }
 
 QPixmap SearchLine::GetButtonPixmap(SearchLine::ButtonPosition btn_postion, SearchLine::ButtonStatus btn_status) const
@@ -342,4 +411,15 @@ void SearchLine::DrawButtonItem(QPainter *painter, SearchLine::ButtonPosition bt
     {
         style()->drawItemPixmap(painter, rect, Qt::AlignLeft, pixmap);
     }
+}
+
+bool SearchLine::CheckMousePos(SearchLine::ButtonPosition btn_postion) const
+{
+    if (ButtonPosition::NoButton == btn_postion)
+    {
+        return false;
+    }
+
+    QPoint pos = mapToGlobal(GetButtonPos(btn_postion));
+    return QRect(pos, btn_size_).contains(QCursor::pos());
 }
